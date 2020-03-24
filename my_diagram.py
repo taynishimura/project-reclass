@@ -9,6 +9,7 @@ from mininet.net import Mininet
 from mininet.clean import cleanup
 from mininet.node import Node
 from mininet.topo import Topo
+from mininet.topolib import TreeTopo
 from mininet.cli import CLI
 
 class DepGraph():
@@ -17,9 +18,13 @@ class DepGraph():
     graph = dict()
     knownDevices = set()
 
-    def __init__(self, links, routers):    
-        self.addAllRouters(routers)
-        self.addAllLinks(links) # prevent infinite loop
+    def __init__(self, links=[], routers=[], switches=[]):
+        if len(routers): self.addAllNodes(routers)
+        else: self.addAllNodes(switches)
+
+        print (links)
+        if len(links): self.addAllLinks(links) # prevent infinite loop
+        print (self.graph)
 
     def findParentNode(self, name):
         return self.findParentNodeInSubtree(self.graph, name)
@@ -29,17 +34,16 @@ class DepGraph():
             return None
         if name in subtree.keys():
             return subtree
-        
         for node in subtree.keys():
             result = self.findParentNodeInSubtree(subtree[node], name)
             if result: return result
         return None
     
-    def addAllRouters(self, routers):
-        for r in routers:
-            self.graph[r] = dict()
-            self.markKnown(r) # TODO @taytay: test mult routers
-    
+    def addAllNodes(self, nodes):
+        for n in nodes:
+            self.graph[n] = dict()
+            self.markKnown(n) # TODO @taytay: test mult routers
+
     def addAllLinks(self, links):
         while len(links):
             skippedLinks = list()
@@ -49,26 +53,28 @@ class DepGraph():
             links = skippedLinks
 
     def addLink(self, n1, n2):
+        print('adding links: ' + n1 + ' ' + n2)
+
         if not self.isKnown(n1) and not self.isKnown(n2):
             return (n1, n2)
-        elif self.isKnown(n1):
+        elif self.isKnown(n1) and not self.isKnown(n2):
             n1_parent = self.findParentNode(n1)
             n1_parent[n1][n2] = dict()
             self.markKnown(n2)
-        elif self.isKnown(n2):
+        elif not self.isKnown(n1) and self.isKnown(n2):
             n2_parent = self.findParentNode(n2)
             n2_parent[n2][n1] = dict()
             self.markKnown(n1)
         else:
-            n2_parent = self.findParentNode(n2)
             n1_parent = self.findParentNode(n1)
+            n2_parent = self.findParentNode(n2)
 
             # routers should be closer to root
             if self.isRouter(n2):
-                n2_parent[n1] = n1_parent[n1]
+                n2_parent[n2][n1] = n1_parent[n1]
                 del n1_parent[n1]
             else:
-                n1_parent[n2] = n2_parent[n2]
+                n1_parent[n1][n2] = n2_parent[n2]
                 del n2_parent[n2]
 
     def isKnown(self, name):
@@ -142,9 +148,9 @@ class TayTopo( Topo ):
                            defaultRoute='via 192.168.1.1' )
         h2 = self.addHost( 'h2', ip='172.16.0.100/12',
                            defaultRoute='via 172.16.0.1' )
-        h3 = self.addHost( 'h3', ip='10.0.0.100/8',
+        h3 = self.addHost( 'h3', ip='172.16.0.101/12',
                            defaultRoute='via 10.0.0.1' )
-        h4 = self.addHost( 'h4', ip='20.0.0.200/8',
+        h4 = self.addHost( 'h4', ip='172.16.0.102/12',
                            defaultRoute='via 20.0.0.1' )
 
         for h, s in [ (h1, s1), (h2, s3), (h3, s4), (h4, s4) ]:
@@ -157,12 +163,12 @@ try:
     # Create Topology
 
     net = Mininet( topo=TayTopo() )  # controller is used by s1-s3
-    # net = Mininet( topo=TreeTopo( depth=1, fanout=6 ) )
+    #net = Mininet( topo=TreeTopo( depth=2, fanout=6 ) )
 
     routerNames = [h.name for h in net.hosts if h.name.startswith('r')]
     switchNames = [s.name for s in net.switches if s.name.startswith('s')]
     links = [ (l.intf1.node.name, l.intf2.node.name) for l in net.links]
-    depGraph = DepGraph(links = links, routers = routerNames)
+    depGraph = DepGraph(links = links, routers = routerNames, switches = switchNames)
     subnets = depGraph.getAllSubnets()
 
     # Create Diagram
@@ -188,9 +194,9 @@ try:
 
 
     net.start()
-    print( '*** Routing Table on Router:\n' ) # TODO @taytay: print was info before
-    print( net[ 'r0' ].cmd( 'route' ) )
-    # CLI( net ) # uncomment to 
+    #print( '*** Routing Table on Router:\n' ) # TODO @taytay: print was info before
+    #print( net[ 'r0' ].cmd( 'route' ) )
+    CLI( net ) # uncomment to 
     net.stop()
 
     cleanup()
