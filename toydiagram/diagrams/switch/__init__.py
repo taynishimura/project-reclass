@@ -1,6 +1,6 @@
-from networkdiagram import NetworkNode
+from toydiagram.network import ToyNetNode
 
-class Switch(NetworkNode):
+class Switch(ToyNetNode):
     _provider = "taynet"
     _icon_dir = "resources/switch"
     fontcolor = "#ffffff"

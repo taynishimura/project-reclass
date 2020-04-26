@@ -1,8 +1,7 @@
+from toydiagram.network import ToyNetNode
 
-from networkdiagram import NetworkNode
 
-
-class Host(NetworkNode):
+class Host(ToyNetNode):
     _provider = "taynet"
     _icon_dir = "resources/host"
     fontcolor = "#ffffff"
