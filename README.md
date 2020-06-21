@@ -39,3 +39,7 @@ Reach out to [Tay](https://www.linkedin.com/in/takakonishimura/) if you want to 
 
 * [CIDR & ARP](https://docs.google.com/presentation/d/1FdFrl565odk45nBlvgMh3zVLkWaSMrjy-wsZpgBb0hw/edit)
 * [ICMP](https://docs.google.com/presentation/d/1mio4J6XV2vNstiRLByvIS_viKaDUgCO6HKCNDNlwIWU/edit)
+
+# Contributors:
+Tay Nishimura
+Enmanuel de la Nuez
