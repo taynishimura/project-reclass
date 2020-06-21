@@ -41,5 +41,5 @@ Reach out to [Tay](https://www.linkedin.com/in/takakonishimura/) if you want to 
 * [ICMP](https://docs.google.com/presentation/d/1mio4J6XV2vNstiRLByvIS_viKaDUgCO6HKCNDNlwIWU/edit)
 
 # Contributors:
-Tay Nishimura
-Enmanuel de la Nuez
+* Tay Nishimura
+* Enmanuel de la Nuez
